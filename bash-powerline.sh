@@ -4,6 +4,11 @@
 #POWERLINE_GIT=0
 
 __powerline() {
+    # Re-source guard.
+	# if [ -n "$(type ps1)" ]; then
+		# return 0
+	# fi 
+
     # Colorscheme
     readonly RESET='\[\033[m\]'
     readonly COLOR_CWD='\[\033[0;34m\]' # blue
@@ -11,18 +16,10 @@ __powerline() {
     readonly COLOR_SUCCESS='\[\033[0;32m\]' # green
     readonly COLOR_FAILURE='\[\033[0;31m\]' # red
 
-    readonly SYMBOL_GIT_BRANCH='⑂'
     readonly SYMBOL_GIT_MODIFIED='*'
-    readonly SYMBOL_GIT_PUSH='↑'
-    readonly SYMBOL_GIT_PULL='↓'
-
-    if [[ -z "$PS_SYMBOL" ]]; then
-      case "$(uname)" in
-          Darwin)   PS_SYMBOL='';;
-          Linux)    PS_SYMBOL='$';;
-          *)        PS_SYMBOL='%';;
-      esac
-    fi
+    readonly SYMBOL_GIT_PUSH='^'
+    readonly SYMBOL_GIT_PULL='v'
+	readonly PS_SYMBOL='\$'
 
     __git_info() { 
         [[ $POWERLINE_GIT = 0 ]] && return # disabled
@@ -32,10 +29,7 @@ __powerline() {
         # get current branch name
         local ref=$($git_eng symbolic-ref --short HEAD 2>/dev/null)
 
-        if [[ -n "$ref" ]]; then
-            # prepend branch symbol
-            ref=$SYMBOL_GIT_BRANCH$ref
-        else
+        if [[ -z "$ref" ]]; then
             # get tag name or short unique hash
             ref=$($git_eng describe --tags --always 2>/dev/null)
         fi
@@ -47,25 +41,25 @@ __powerline() {
         # scan first two lines of output from `git status`
         while IFS= read -r line; do
             if [[ $line =~ ^## ]]; then # header line
-                [[ $line =~ ahead\ ([0-9]+) ]] && marks+=" $SYMBOL_GIT_PUSH${BASH_REMATCH[1]}"
-                [[ $line =~ behind\ ([0-9]+) ]] && marks+=" $SYMBOL_GIT_PULL${BASH_REMATCH[1]}"
+                [[ $line =~ ahead\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PUSH"
+                [[ $line =~ behind\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PULL"
             else # branch is modified if output contains more lines after the header line
-                marks="$SYMBOL_GIT_MODIFIED$marks"
+                marks="$marks $SYMBOL_GIT_MODIFIED"
                 break
             fi
         done < <($git_eng status --porcelain --branch 2>/dev/null)  # note the space between the two <
 
         # print the git branch segment without a trailing newline
-        printf " $ref$marks"
+        printf " [$marks$ref]"
     }
 
     ps1() {
         # Check the exit code of the previous command and display different
         # colors in the prompt accordingly. 
-        if [ $? -eq 0 ]; then
+        if [ "$?" -eq 0 ]; then
             local symbol="$COLOR_SUCCESS $PS_SYMBOL $RESET"
-        else
-            local symbol="$COLOR_FAILURE $PS_SYMBOL $RESET"
+		else
+			local symbol="$COLOR_FAILURE $PS_SYMBOL $RESET"
         fi
 
         local cwd="$COLOR_CWD\w$RESET"
