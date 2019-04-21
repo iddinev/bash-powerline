@@ -4,82 +4,119 @@
 #POWERLINE_GIT=0
 
 __powerline() {
-    # Re-source guard.
-	# if [ -n "$(type ps1)" ]; then
-		# return 0
-	# fi 
+	# Re-source guard.
+	if [ -n "$(type ps1 2>/dev/null)" ]; then
+		return 0
+	fi
 
-    # Colorscheme
-    readonly RESET='\[\033[m\]'
-    readonly COLOR_CWD='\[\033[0;34m\]' # blue
-    readonly COLOR_GIT='\[\033[0;36m\]' # cyan
-    readonly COLOR_SUCCESS='\[\033[0;32m\]' # green
-    readonly COLOR_FAILURE='\[\033[0;31m\]' # red
+	# Colorscheme, Uses
+	readonly RESET='\[\e[0m\]'
+	readonly COLOR_CWD='\[\e[38;5;226m\]'
+	readonly COLOR_GIT='\[\e[94m\]'
+	readonly COLOR_SUCCESS='\[\e[32m\]'
+	readonly COLOR_FAILURE='\e[38;5;203m\]'
+	readonly COLOR_AT='\[\e[38;5;51m\]'
+	readonly COLOR_DATE='\[\e[38;5;51m\]'
+	readonly COLOR_USER='\[\e[32m\]'
+	readonly COLOR_HOST='\[\e[94m\]'
+	readonly COLOR_BOLD='\[\e[1m\]'
 
-    readonly SYMBOL_GIT_MODIFIED='*'
-    readonly SYMBOL_GIT_PUSH='^'
-    readonly SYMBOL_GIT_PULL='v'
-	readonly PS_SYMBOL='\$'
+	# readonly COLOR_DEFAULT='\[\e[39m\]'
+	# readonly COLOR_BLACK='\[\e[30m\]'    # Color # 0
+	# readonly COLOR_RED='\[\e[31m\]'      # Color # 1
+	# readonly COLOR_GREEN='\[\e[32m\]'    # Color # 2
+	# readonly COLOR_YELLOW='\[\e[33m\]'   # Color # 3
+	# readonly COLOR_BLUE='\[\e[34m\]'     # Color # 4
+	# readonly COLOR_MAGENTA='\[\e[35m\]'  # Color # 5
+	# readonly COLOR_CYAN='\[\e[36m\]'     # Color # 6
+	# readonly COLOR_LGRAY='\[\e[37m\]'    # Color # 7
+	# readonly COLOR_DGRAY='\[\e[90m\]'    # Color # 8
+	# readonly COLOR_LRED='\[\e[91m\]'     # Color # 9
+	# readonly COLOR_LGREEN='\[\e[92m\]'   # Color # 10
+	# readonly COLOR_LYELLOW='\[\e[93m\]'  # Color # 11
+	# readonly COLOR_LBLUE='\[\e[94m\]'    # Color # 12
+	# readonly COLOR_LMAGENTA='\[\e[95m\]' # Color # 13
+	# readonly COLOR_LCYAN='\[\e[96m\]'    # Color # 14
+	# readonly COLOR_WHITE='\[\e[97m\]'    # Color # 15
 
-    __git_info() { 
-        [[ $POWERLINE_GIT = 0 ]] && return # disabled
-        hash git 2>/dev/null || return # git not found
-        local git_eng="env LANG=C git"   # force git output in English to make our work easier
+	readonly SYMBOL_GIT_MODIFIED='*'
+	readonly SYMBOL_GIT_PUSH='^'
+	readonly SYMBOL_GIT_PULL='v'
 
-        # get current branch name
-        local ref=$($git_eng symbolic-ref --short HEAD 2>/dev/null)
 
-        if [[ -z "$ref" ]]; then
-            # get tag name or short unique hash
-            ref=$($git_eng describe --tags --always 2>/dev/null)
-        fi
+	__git_info() {
+		[[ $POWERLINE_GIT = 0 ]] && return # disabled
+		hash git 2>/dev/null || return # git not found
+		local git_eng="env LANG=C git"   # force git output in English to make our work easier
 
-        [[ -n "$ref" ]] || return  # not a git repo
+		# get current branch name
+		local ref=$($git_eng symbolic-ref --short HEAD 2>/dev/null)
 
-        local marks
-
-        # scan first two lines of output from `git status`
-        while IFS= read -r line; do
-            if [[ $line =~ ^## ]]; then # header line
-                [[ $line =~ ahead\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PUSH"
-                [[ $line =~ behind\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PULL"
-            else # branch is modified if output contains more lines after the header line
-                marks="$marks $SYMBOL_GIT_MODIFIED"
-                break
-            fi
-        done < <($git_eng status --porcelain --branch 2>/dev/null)  # note the space between the two <
-
-        # print the git branch segment without a trailing newline
-        printf " [$marks$ref]"
-    }
-
-    ps1() {
-        # Check the exit code of the previous command and display different
-        # colors in the prompt accordingly. 
-        if [ "$?" -eq 0 ]; then
-            local symbol="$COLOR_SUCCESS $PS_SYMBOL $RESET"
+		if [[ -n "$ref" ]]; then
+			# prepend branch symbol
+			ref=$SYMBOL_GIT_BRANCH$ref
 		else
-			local symbol="$COLOR_FAILURE $PS_SYMBOL $RESET"
-        fi
+			# get tag name or short unique hash
+			ref=$($git_eng describe --tags --always 2>/dev/null)
+		fi
 
-        local cwd="$COLOR_CWD\w$RESET"
-        # Bash by default expands the content of PS1 unless promptvars is disabled.
-        # We must use another layer of reference to prevent expanding any user
-        # provided strings, which would cause security issues.
-        # POC: https://github.com/njhartwell/pw3nage
-        # Related fix in git-bash: https://github.com/git/git/blob/9d77b0405ce6b471cb5ce3a904368fc25e55643d/contrib/completion/git-prompt.sh#L324
-        if shopt -q promptvars; then
-            __powerline_git_info="$(__git_info)"
-            local git="$COLOR_GIT\${__powerline_git_info}$RESET"
-        else
-            # promptvars is disabled. Avoid creating unnecessary env var.
-            local git="$COLOR_GIT$(__git_info)$RESET"
-        fi
+		[[ -n "$ref" ]] || return  # not a git repo
 
-        PS1="$cwd$git$symbol"
-    }
+		local marks
 
-    PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+		# scan first two lines of output from `git status`
+		while IFS= read -r line; do
+			if [[ $line =~ ^## ]]; then # header line
+				[[ $line =~ ahead\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PUSH "
+				[[ $line =~ behind\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PULL "
+			else # branch is modified if output contains more lines after the header line
+				marks="$SYMBOL_GIT_MODIFIED$marks"
+				break
+			fi
+		done < <($git_eng status --porcelain --branch 2>/dev/null)  # note the space between the two <
+
+			# print the git branch segment without a trailing newline
+			printf "[$marks$ref]"
+	}
+
+	ps1() {
+		# Check the exit code of the previous command and display different
+		# colors in the prompt accordingly.
+		if [ "$?" -eq 0 ]; then
+			local symbol="$COLOR_SUCCESS$COLOR_BOLD\n\$ $RESET"
+		else
+			local symbol="$COLOR_FAILURE$COLOR_BOLD\n\$ $RESET"
+		fi
+
+		# local cwd="$COLOR_BOLD$COLOR_CWD[\w]$RESET"
+		local cwd="$COLOR_CWD[\w]$RESET"
+		local user="$COLOR_USER\u"
+		local host="$COLOR_HOST\h"
+		local at="$COLOR_AT@"
+		local date="$COLOR_DATE[\t \d]$RESET"
+		if [ -r /etc/os-release ]; then
+			# Do not polute the namespace.
+			eval $(grep NAME /etc/os-release)
+			local os="$COLOR_USER $NAME "
+			unset NAME
+		fi
+		# Bash by default expands the content of PS1 unless promptvars is disabled.
+		# We must use another layer of reference to prevent expanding any user
+		# provided strings, which would cause security issues.
+		# POC: https://github.com/njhartwell/pw3nage
+		# Related fix in git-bash: https://github.com/git/git/blob/9d77b0405ce6b471cb5ce3a904368fc25e55643d/contrib/completion/git-prompt.sh#L324
+		if shopt -q promptvars; then
+			__powerline_git_info="$(__git_info)"
+			local git="$COLOR_GIT\${__powerline_git_info}$RESET"
+		else
+			# promptvars is disabled. Avoid creating unnecessary env var.
+			local git="$COLOR_GIT$(__git_info)$RESET"
+		fi
+
+		PS1="$COLOR_BOLD$user$at$host$os$RESET$date$cwd$git$symbol"
+	}
+
+	PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 }
 
 __powerline
