@@ -1,3 +1,5 @@
+## The original project description below is kept for the sake of consistency. This fork introduces some undocumented, albeit minor changes!
+### ----------------------------------------------------
 # bash-powerline
 
 Powerline for Bash in pure Bash script.
