@@ -14,7 +14,7 @@ __powerline() {
 	readonly COLOR_CWD='\[\e[38;5;226m\]'
 	readonly COLOR_GIT='\[\e[94m\]'
 	readonly COLOR_SUCCESS='\[\e[32m\]'
-	readonly COLOR_FAILURE='\e[38;5;203m\]'
+	readonly COLOR_FAILURE='\[\e[38;5;203m\]'
 	readonly COLOR_AT='\[\e[38;5;51m\]'
 	readonly COLOR_DATE='\[\e[38;5;51m\]'
 	readonly COLOR_USER='\[\e[32m\]'
@@ -93,11 +93,12 @@ __powerline() {
 		local user="$COLOR_USER\u"
 		local host="$COLOR_HOST\h"
 		local at="$COLOR_AT@"
-		local date="$COLOR_DATE[\t \d]$RESET"
+		local date="$COLOR_DATE[\t/$(date +%d-%m-%Y)]$RESET"
+		local os=' '
 		if [ -r /etc/os-release ]; then
 			# Do not polute the namespace.
 			eval $(grep NAME /etc/os-release)
-			local os="$COLOR_USER $NAME "
+			os="/$COLOR_USER$NAME "
 			unset NAME
 		fi
 		# Bash by default expands the content of PS1 unless promptvars is disabled.
@@ -113,7 +114,7 @@ __powerline() {
 			local git="$COLOR_GIT$(__git_info)$RESET"
 		fi
 
-		PS1="$COLOR_BOLD$user$at$host$os$RESET$date$cwd$git$symbol"
+		PS1="$COLOR_BOLD$user$at$host$RESET$os$date$cwd$git$symbol"
 	}
 
 	PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
