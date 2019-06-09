@@ -18,6 +18,7 @@ __powerline() {
 	readonly COLOR_AT='\[\e[38;5;51m\]'
 	readonly COLOR_DATE='\[\e[38;5;51m\]'
 	readonly COLOR_USER='\[\e[32m\]'
+	readonly COLOR_ROOT='\[\e[31m\]'
 	readonly COLOR_HOST='\[\e[94m\]'
 	readonly COLOR_BOLD='\[\e[1m\]'
 
@@ -88,9 +89,12 @@ __powerline() {
 			local symbol="$COLOR_FAILURE$COLOR_BOLD\n\$ $RESET"
 		fi
 
-		# local cwd="$COLOR_BOLD$COLOR_CWD[\w]$RESET"
 		local cwd="$COLOR_CWD[\w]$RESET"
-		local user="$COLOR_USER\u"
+		if [ $(id -u) = 0 ]; then
+			local user="$COLOR_ROOT\u"
+		else
+			local user="$COLOR_USER\u"
+		fi
 		local host="$COLOR_HOST\h"
 		local at="$COLOR_AT@"
 		local date="$COLOR_DATE[\t \d]$RESET"
@@ -113,7 +117,7 @@ __powerline() {
 			local git="$COLOR_GIT$(__git_info)$RESET"
 		fi
 
-		PS1="$COLOR_BOLD$user$at$host$os$RESET$date$cwd$git$symbol"
+		PS1="$COLOR_BOLD$user$at$host$os$RESET$date$git$cwd$symbol"
 	}
 
 	PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
