@@ -20,6 +20,7 @@ __powerline() {
 	readonly COLOR_USER='\[\e[32m\]'
 	readonly COLOR_ROOT='\[\e[31m\]'
 	readonly COLOR_HOST='\[\e[94m\]'
+	readonly COLOR_TMUX='\[\e[94m\]'
 	readonly COLOR_BOLD='\[\e[1m\]'
 
 	# readonly COLOR_DEFAULT='\[\e[39m\]'
@@ -106,6 +107,11 @@ __powerline() {
 			os="/$COLOR_USER$NAME "
 			unset NAME
 		fi
+		local tmuxs=''
+		if [[ -n "${TMUX+set}" ]]; then
+			tmuxs="tmux:$(tmux display-message -p '#{session_name}')"
+			tmuxs="$COLOR_TMUX$tmuxs|"
+		fi
 		# Bash by default expands the content of PS1 unless promptvars is disabled.
 		# We must use another layer of reference to prevent expanding any user
 		# provided strings, which would cause security issues.
@@ -119,7 +125,7 @@ __powerline() {
 			local git="$COLOR_GIT$(__git_info)$RESET"
 		fi
 
-		PS1="$COLOR_BOLD$user$at$host$RESET$os$date$git$cwd$symbol"
+		PS1="$COLOR_BOLD$tmuxs$user$at$host$RESET$os$date$git$cwd$symbol"
 	}
 
 	PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
