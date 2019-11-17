@@ -17,7 +17,7 @@ __powerline() {
 	COLOR_FAILURE=${COLOR_FAILURE:-'\[\e[38;5;203m\]'}
 	COLOR_AT=${COLOR_AT:-'\[\e[38;5;51m\]'}
 	COLOR_DATE=${COLOR_DATE:-'\[\e[38;5;51m\]'}
-	COLOR_USER=${COLOR_ROOT:-'\[\e[32m\]'}
+	COLOR_USER=${COLOR_USER:-'\[\e[32m\]'}
 	COLOR_ROOT=${COLOR_ROOT:-'\[\e[31m\]'}
 	COLOR_HOST=${COLOR_HOST:-'\[\e[94m\]'}
 	COLOR_TMUX=${COLOR_TMUX:-'\[\e[94m\]'}
