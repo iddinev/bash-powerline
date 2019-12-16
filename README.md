@@ -18,7 +18,7 @@ information.
 
 I've included some personal modifications/additions:
 - Simpler (not reliable on fancy fonts) symbols.
-- Modular look - easy for copy-pasting.
+- Modular look - easy for extension and copy-pasting around - paths/time/dates.
 - Additional sections: tmux, date, OS flavour, root/user, hostname.
 
 ## Installation

@@ -98,7 +98,11 @@ __powerline() {
 		else
 			local user="$COLOR_USER\u"
 		fi
-		local host="$COLOR_HOST\h"
+		if [[ -z "${SSH_CONNECTION}" ]]; then
+			local host="$COLOR_HOST\h"
+		else
+			local host="${COLOR_ROOT}ssh:${COLOR_HOST}\h"
+		fi
 		local at="$COLOR_AT@"
 		local date="$COLOR_DATE[\t/$(date +%d-%m-%Y)]$RESET"
 		local os=' '
