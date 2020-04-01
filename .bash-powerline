@@ -11,16 +11,16 @@ __powerline() {
 
 	# Colorscheme, Uses
 	RESET='\[\e[0m\]'
-	COLOR_CWD=${COLOR_CWD:-'\[\e[38;5;226m\]'}
-	COLOR_GIT=${COLOR_GIT:-'\[\e[94m\]'}
+	COLOR_CWD=${COLOR_CWD:-'\[\e[33m\]'}
+	COLOR_GIT=${COLOR_GIT:-'\[\e[34m\]'}
 	COLOR_SUCCESS=${COLOR_SUCCESS:-'\[\e[32m\]'}
-	COLOR_FAILURE=${COLOR_FAILURE:-'\[\e[38;5;203m\]'}
-	COLOR_AT=${COLOR_AT:-'\[\e[38;5;51m\]'}
-	COLOR_DATE=${COLOR_DATE:-'\[\e[38;5;51m\]'}
+	COLOR_FAILURE=${COLOR_FAILURE:-'\[\e[31m\]'}
+	COLOR_AT=${COLOR_AT:-'\[\e[96m\]'}
+	COLOR_DATE=${COLOR_DATE:-'\[\e[36m\]'}
 	COLOR_USER=${COLOR_USER:-'\[\e[32m\]'}
-	COLOR_ROOT=${COLOR_ROOT:-'\[\e[31m\]'}
-	COLOR_HOST=${COLOR_HOST:-'\[\e[94m\]'}
-	COLOR_TMUX=${COLOR_TMUX:-'\[\e[94m\]'}
+	COLOR_ROOT=${COLOR_ROOT:-'\[\e[91m\]'}
+	COLOR_HOST=${COLOR_HOST:-'\[\e[34m\]'}
+	COLOR_TMUX=${COLOR_TMUX:-'\[\e[34m\]'}
 	COLOR_BOLD=${COLOR_BOLD:-'\[\e[1m\]'}
 
 	# COLOR_DEFAULT='\[\e[39m\]'
