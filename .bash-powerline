@@ -58,7 +58,7 @@ __powerline() {
 
 		if [[ -n "$ref" ]]; then
 			# prepend branch symbol
-			ref=$SYMBOL_GIT_BRANCH$ref
+			ref=${SYMBOL_GIT_BRANCH}${ref}
 		else
 			# get tag name or short unique hash
 			ref=$($git_eng describe --tags --always 2>/dev/null)
@@ -71,11 +71,11 @@ __powerline() {
 		# scan first two lines of output from `git status`
 		while IFS= read -r line; do
 			if [[ $line =~ ^## ]]; then # header line
-				[[ $line =~ ahead\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PUSH "
-				[[ $line =~ behind\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}$SYMBOL_GIT_PULL "
+				[[ $line =~ ahead\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}${SYMBOL_GIT_PUSH} "
+				[[ $line =~ behind\ ([0-9]+) ]] && marks+="${BASH_REMATCH[1]}${SYMBOL_GIT_PULL} "
 			else # branch is modified if output contains more lines after the header line
 				# marks="$SYMBOL_GIT_MODIFIED$marks"
-				ref="$SYMBOL_GIT_MODIFIED$ref"
+				ref="${SYMBOL_GIT_MODIFIED}${ref}"
 				break
 			fi
 		done < <($git_eng status --porcelain --branch 2>/dev/null)  # note the space between the two <
@@ -89,37 +89,38 @@ __powerline() {
 		# colors in the prompt accordingly.
 		# shellcheck disable=2181
 		if [ "$?" -eq 0 ]; then
-			local symbol="$COLOR_SUCCESS$COLOR_BOLD\n\$ $RESET"
+			local symbol="${COLOR_SUCCESS}${COLOR_BOLD}\n\$ ${RESET}"
 		else
-			local symbol="$COLOR_FAILURE$COLOR_BOLD\n\$ $RESET"
+			local symbol="${COLOR_FAILURE}${COLOR_BOLD}\n\$ ${RESET}"
 		fi
 
 		# shellcheck disable=1087
-		local cwd="$COLOR_CWD[\w]$RESET"
+		local cwd="${COLOR_CWD}[\w]${RESET}"
 		if [ "$(id -u)" = 0 ]; then
-			local user="$COLOR_ROOT\u"
+			local user="${COLOR_BOLD}${COLOR_ROOT}\u${RESET}"
 		else
-			local user="$COLOR_USER\u"
+			local user="${COLOR_BOLD}${COLOR_USER}\u${RESET}"
 		fi
 		if [[ -z "${SSH_CONNECTION}" ]]; then
-			local host="$COLOR_HOST\h"
+			local host="${COLOR_BOLD}${COLOR_HOST}\h${RESET}"
 		else
-			local host="${COLOR_ROOT}ssh:${COLOR_HOST}\h"
+			local host="${COLOR_BOLD}${COLOR_ROOT}ssh:${COLOR_HOST}\h${COLOR_RESET}"
 		fi
-		local at="$COLOR_AT@"
+		local at="${COLOR_BOLD}${COLOR_AT}@${COLOR_RESET}"
 		# shellcheck disable=2155,1087
-		local date="$COLOR_DATE[\t/$(date +%d-%m-%Y)]$RESET"
+		local date="${COLOR_DATE}[\t/$(date +%d-%m-%Y)]${RESET}"
 		local os=' '
 		if [ -r /etc/os-release ]; then
 			# Do not polute the namespace.
 			eval "$(grep NAME /etc/os-release)"
-			os="/$COLOR_USER$NAME "
+			os="/${COLOR_USER}${NAME} ${COLOR_RESET}"
 			unset NAME
 		fi
-		local tmuxs=''
+		local tmux=''
+		# shellcheck disable=2153
 		if [[ -n "${TMUX+set}" ]]; then
-			tmuxs="tmux:$(tmux display-message -p '#{session_name}')"
-			tmuxs="$COLOR_TMUX$tmuxs|"
+			tmux="tmux:$(tmux display-message -p '#{session_name}')"
+			tmux="${COLOR_BOLD}${COLOR_TMUX}${tmux}|${COLOR_RESET}"
 		fi
 		# Bash by default expands the content of PS1 unless promptvars is disabled.
 		# We must use another layer of reference to prevent expanding any user
@@ -129,14 +130,14 @@ __powerline() {
 		if shopt -q promptvars; then
 			# shellcheck disable=2034
 			__powerline_git_info="$(__git_info)"
-			local git="$COLOR_GIT\${__powerline_git_info}$RESET"
+			local git="${COLOR_GIT}\${__powerline_git_info}${RESET}"
 		else
 			# promptvars is disabled. Avoid creating unnecessary env var.
 			# shellcheck disable=2155
-			local git="$COLOR_GIT$(__git_info)$RESET"
+			local git="${COLOR_GIT}$(__git_info)${RESET}"
 		fi
 
-		PS1="$COLOR_BOLD$tmuxs$user$at$host$RESET$os$date$git$cwd$symbol"
+		PS1="${tmux}${pvenv}${user}${at}${host}${os}${date}${git}${cwd}${symbol}"
 	}
 
 	PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
