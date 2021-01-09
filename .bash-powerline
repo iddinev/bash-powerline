@@ -122,6 +122,12 @@ __powerline() {
 			tmux="tmux:$(tmux display-message -p '#{session_name}')"
 			tmux="${COLOR_BOLD}${COLOR_TMUX}${tmux}|${COLOR_RESET}"
 		fi
+		# Python virtual environment.
+		local pvenv=''
+		if [[ -n "${VIRTUAL_ENV}" ]]; then
+			local pvenv="${VIRTUAL_ENV##*/}"
+			pvenv="${COLOR_GIT}(${pvenv})${COLOR_RESET}"
+		fi
 		# Bash by default expands the content of PS1 unless promptvars is disabled.
 		# We must use another layer of reference to prevent expanding any user
 		# provided strings, which would cause security issues.
