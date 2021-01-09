@@ -53,6 +53,7 @@ __powerline() {
 		local git_eng="env LANG=C git"   # force git output in English to make our work easier
 
 		# get current branch name
+		# shellcheck disable=SC2155
 		local ref=$($git_eng symbolic-ref --short HEAD 2>/dev/null)
 
 		if [[ -n "$ref" ]]; then
@@ -80,20 +81,22 @@ __powerline() {
 		done < <($git_eng status --porcelain --branch 2>/dev/null)  # note the space between the two <
 
 			# print the git branch segment without a trailing newline
-			printf "[$marks$ref]"
+			printf "[%s%s]" "$marks" "$ref"
 	}
 
 	ps1() {
 		# Check the exit code of the previous command and display different
 		# colors in the prompt accordingly.
+		# shellcheck disable=2181
 		if [ "$?" -eq 0 ]; then
 			local symbol="$COLOR_SUCCESS$COLOR_BOLD\n\$ $RESET"
 		else
 			local symbol="$COLOR_FAILURE$COLOR_BOLD\n\$ $RESET"
 		fi
 
+		# shellcheck disable=1087
 		local cwd="$COLOR_CWD[\w]$RESET"
-		if [ $(id -u) = 0 ]; then
+		if [ "$(id -u)" = 0 ]; then
 			local user="$COLOR_ROOT\u"
 		else
 			local user="$COLOR_USER\u"
@@ -104,11 +107,12 @@ __powerline() {
 			local host="${COLOR_ROOT}ssh:${COLOR_HOST}\h"
 		fi
 		local at="$COLOR_AT@"
+		# shellcheck disable=2155,1087
 		local date="$COLOR_DATE[\t/$(date +%d-%m-%Y)]$RESET"
 		local os=' '
 		if [ -r /etc/os-release ]; then
 			# Do not polute the namespace.
-			eval $(grep NAME /etc/os-release)
+			eval "$(grep NAME /etc/os-release)"
 			os="/$COLOR_USER$NAME "
 			unset NAME
 		fi
@@ -123,10 +127,12 @@ __powerline() {
 		# POC: https://github.com/njhartwell/pw3nage
 		# Related fix in git-bash: https://github.com/git/git/blob/9d77b0405ce6b471cb5ce3a904368fc25e55643d/contrib/completion/git-prompt.sh#L324
 		if shopt -q promptvars; then
+			# shellcheck disable=2034
 			__powerline_git_info="$(__git_info)"
 			local git="$COLOR_GIT\${__powerline_git_info}$RESET"
 		else
 			# promptvars is disabled. Avoid creating unnecessary env var.
+			# shellcheck disable=2155
 			local git="$COLOR_GIT$(__git_info)$RESET"
 		fi
 
